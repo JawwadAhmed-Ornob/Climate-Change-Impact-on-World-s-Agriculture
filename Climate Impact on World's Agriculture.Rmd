@@ -1,0 +1,619 @@
+---
+title: "Climate Impact On World's Agriculture"
+author: "Jawwad Ahmed Ornob"
+date: "2024-09-16"
+output: pdf_document
+---
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+
+Climate_Data <- read.csv("C:/Users/HP/R Programming/Climate_Impact.csv")
+
+
+# Arranging the given data in Ascendiing order on the basis of Year
+Climate_Data <- Climate_Data %>% arrange(Year)
+head(Climate_Data, n=5)
+tail(Climate_Data, n=5)
+## We can see that the dataset contains the information of (1990-2024)
+
+# Finding out the names of each column
+colnames(Climate_Data)
+
+
+# Finding Out the Number of Countries in the Dataset
+unique_countries <- Climate_Data %>% 
+  distinct(Country)
+print(unique_countries)
+
+
+
+## Creating Function to find out the unique regions of Each Country
+get_unique_regions <- function(data, country_name) {
+  unique_regions <- data %>% 
+    filter(Country == country_name) %>%
+    distinct(Region)
+  
+  return(unique_regions)
+}
+
+
+# Finding out the Regions of Each Country
+
+## Australia
+unique_regions_australia <- get_unique_regions(Climate_Data,"Australia")
+print(unique_regions_australia)
+
+
+## France
+unique_regions_france <- get_unique_regions(Climate_Data,"France")
+print(unique_regions_france)
+
+
+## Canada
+unique_regions_canada <- get_unique_regions(Climate_Data,"Canada")
+print(unique_regions_canada)
+
+
+## Nigeria
+unique_regions_nigeria <- get_unique_regions(Climate_Data,"Nigeria")
+print(unique_regions_nigeria)
+
+
+
+## Argentina
+unique_regions_argentina <- get_unique_regions(Climate_Data,"Argentina")
+print(unique_regions_argentina)
+
+
+## China
+unique_regions_china <- get_unique_regions(Climate_Data,"China")
+print(unique_regions_china)
+
+
+## Russia
+unique_regions_russia <- get_unique_regions(Climate_Data,"Russia")
+print(unique_regions_russia)
+
+
+## India
+unique_regions_india <- get_unique_regions(Climate_Data,"India")
+print(unique_regions_india)
+
+
+## Brasil
+unique_regions_brazil <- get_unique_regions(Climate_Data,"Brazil")
+print(unique_regions_brazil)
+
+
+## USA
+unique_regions_usa <- get_unique_regions(Climate_Data,"USA")
+print(unique_regions_usa)
+
+
+
+## Crop Data of the Every Regions of Each Country
+
+# Creating a Function to summarize and visualize crop types by region for a given country using a heatmap and facet plot
+summarize_and_visualize_crops_by_country <- function(data, country) {
+  country_data <- data %>% 
+    filter(Country == country)
+  
+ 
+  crop_summary <- country_data %>% 
+    group_by(Region, Crop_Type) %>% 
+    summarise(Count = n(), .groups = 'drop')
+  
+
+  # Facet Plot
+  facet_plot <- ggplot(crop_summary, aes(x = Count, y = Crop_Type, fill = Crop_Type)) +
+    geom_bar(stat = "identity") +
+    facet_wrap(~Region, scales = "free") +
+    labs(title = paste("Facet Plot of Crop Types by Region in", country),
+         x = "Region",
+         y = "Count") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  print(facet_plot)
+  
+  
+  # Heat Map
+  heatmap_plot <- ggplot(crop_summary, aes(x = Region, y = Crop_Type, fill = Count)) +
+    scale_fill_gradient(low = "lightblue", high = "darkblue") +
+    geom_tile() +
+    labs(title = paste("Heatmap of Crop Types by Region in", country),
+         x = "Region",
+         y = "Crop Type",
+         fill = "Count") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  print(heatmap_plot)
+  
+  
+  return(crop_summary)
+}
+
+
+# France
+france_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "France")
+print(france_crops)
+
+# Canada
+canada_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "Canada")
+print(canada_crops)
+
+# Nigeria
+nigeria_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "Nigeria")
+print(nigeria_crops)
+
+# Argentina
+argentina_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "Argentina")
+print(argentina_crops)
+
+# China
+china_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "China")
+print(china_crops)
+
+# Russia
+russia_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "Russia")
+print(russia_crops)
+
+# Australia
+australia_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "Australia")
+print(australia_crops)
+
+# India
+india_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "India")
+print(india_crops)
+
+# Brzsil
+brazil_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "Brazil")
+print(brazil_crops)
+
+# USA
+usa_crops <- summarize_and_visualize_crops_by_country(Climate_Data, "USA")
+print(usa_crops)
+
+
+## Creating Functions to Visualize the Average Temperature Trend of all Regions of Each Country
+
+# Facet Line Plots
+
+plot_temp_trend_country_facet <- function(data, country_name) {
+  # Filter the data for the specified country
+  filtered_data <- data %>%
+    filter(Country == country_name)
+  
+  # Check if the country is in the dataset
+  if (nrow(filtered_data) == 0) {
+    stop("Country not found in the dataset.")
+  }
+  
+  # Plot the average temperature trend using facets
+  ggplot(filtered_data, aes(x = Year, y = Average_Temperature_C)) +
+    geom_line() +
+    facet_wrap(~ Region) +
+    labs(title = paste("Average Temperature Trend by Region in", country_name),
+         x = "Year",
+         y = "Average Temperature (°C)") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels if needed
+}
+
+
+# Scatter Plot
+
+plot_temp_smooth_country <- function(data, country_name) {
+  # Filter the data for the specified country
+  filtered_data <- data %>%
+    filter(Country == country_name)
+  
+  # Check if the country is in the dataset
+  if (nrow(filtered_data) == 0) {
+    stop("Country not found in the dataset.")
+  }
+  
+  # Plot scatter plots with smooth lines
+  ggplot(filtered_data, aes(x = Year, y = Average_Temperature_C, color = Region)) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method = "loess") +
+    labs(title = paste("Average Temperature Trend by Region in", country_name),
+         x = "Year",
+         y = "Average Temperature (°C)") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels if needed
+}
+
+
+# Box Plot
+
+plot_temp_boxplot_country <- function(data, country_name) {
+  # Filter the data for the specified country
+  filtered_data <- data %>%
+    filter(Country == country_name)
+  
+  # Check if the country is in the dataset
+  if (nrow(filtered_data) == 0) {
+    stop("Country not found in the dataset.")
+  }
+  
+  # Plot a box plot of average temperatures by year and region
+  ggplot(filtered_data, aes(x = factor(Year), y = Average_Temperature_C, fill = Region)) +
+    geom_boxplot() +
+    labs(title = paste("Average Temperature Boxplot by Region in", country_name),
+         x = "Year",
+         y = "Average Temperature (°C)") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels if needed
+}
+
+
+# France
+plot_temp_trend_country_facet(Climate_Data, "France")
+plot_temp_smooth_country(Climate_Data, "France")
+plot_temp_boxplot_country(Climate_Data, "France")
+
+# Canada
+plot_temp_trend_country_facet(Climate_Data, "Canada")
+plot_temp_smooth_country(Climate_Data, "Canada")
+plot_temp_boxplot_country(Climate_Data, "Canada")
+
+# Nigeria
+plot_temp_trend_country_facet(Climate_Data, "Nigeria")
+plot_temp_smooth_country(Climate_Data, "Nigeria")
+plot_temp_boxplot_country(Climate_Data, "Nigeria")
+
+# Argentina
+plot_temp_trend_country_facet(Climate_Data, "Argentina")
+plot_temp_smooth_country(Climate_Data, "Argentina")
+plot_temp_boxplot_country(Climate_Data, "Argentina")
+
+# China
+plot_temp_trend_country_facet(Climate_Data, "China")
+plot_temp_smooth_country(Climate_Data, "China")
+plot_temp_boxplot_country(Climate_Data, "China")
+
+# Russia
+plot_temp_trend_country_facet(Climate_Data, "Russia")
+plot_temp_smooth_country(Climate_Data, "Russia")
+plot_temp_boxplot_country(Climate_Data, "Russia")
+
+# Australia
+plot_temp_trend_country_facet(Climate_Data, "Australia")
+plot_temp_smooth_country(Climate_Data, "Australia")
+plot_temp_boxplot_country(Climate_Data, "Australia")
+
+# India
+plot_temp_trend_country_facet(Climate_Data, "India")
+plot_temp_smooth_country(Climate_Data, "India")
+plot_temp_boxplot_country(Climate_Data, "India")
+
+# Brazil
+plot_temp_trend_country_facet(Climate_Data, "Brazil")
+plot_temp_smooth_country(Climate_Data, "Brazil")
+plot_temp_boxplot_country(Climate_Data, "Brazil")
+
+# USA
+plot_temp_trend_country_facet(Climate_Data, "USA")
+plot_temp_smooth_country(Climate_Data, "USA")
+plot_temp_boxplot_country(Climate_Data, "USA")
+
+## Function to plot total precipitation for each region in a country
+
+plot_precipitation_area <- function(data, country_name) {
+  if (!is.data.frame(data)) {
+    stop("The data argument must be a data frame.")
+  }
+  
+  filtered_data <- data %>%
+    filter(Country == country_name)
+
+  if (nrow(filtered_data) == 0) {
+    stop("Country not found in the dataset.")
+  }
+  
+  required_columns <- c("Region", "Total_Precipitation_mm", "Year")
+  missing_columns <- setdiff(required_columns, colnames(filtered_data))
+  
+  if (length(missing_columns) > 0) {
+    stop(paste("Missing columns in the dataset:", paste(missing_columns, collapse = ", ")))
+  }
+  
+# Area plot for total precipitation by year and region
+  ggplot(filtered_data, aes(x = Year, y = Total_Precipitation_mm, fill = Region)) +
+    geom_area(alpha = 0.6, position = "stack") +
+    labs(title = paste("Area Plot of Precipitation by Year and Region in", country_name),
+         x = "Year",
+         y = "Total Precipitation (mm)") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))  
+}
+
+# France
+plot_precipitation_area(Climate_Data, "France")
+
+# Canada
+plot_precipitation_area(Climate_Data, "Canada")
+
+# Nigeria
+plot_precipitation_area(Climate_Data, "Nigeria")
+
+# Argentina
+plot_precipitation_area(Climate_Data, "Argentina")
+
+# China
+plot_precipitation_area(Climate_Data, "China")
+
+# Russia
+plot_precipitation_area(Climate_Data, "Russia")
+
+# Australia
+plot_precipitation_area(Climate_Data, "Australia")
+
+# India
+plot_precipitation_area(Climate_Data, "India")
+
+# Brazil
+plot_precipitation_area(Climate_Data, "Brazil")
+
+# USA
+plot_precipitation_area(Climate_Data, "USA")
+
+
+
+
+# Creating a function to Visualize the CO2 Emission of all regions of each countries in every Year (1990-2024)
+
+plot_co2_stacked_area <- function(data, country_name) {
+  country_data <- data %>%
+    filter(Country == country_name)
+  
+  ggplot(country_data, aes(x = Year, y = CO2_Emissions_MT, fill = Region)) +
+    geom_area(alpha = 0.6) +
+    labs(title = paste("CO2 Emissions by Region in", country_name),
+         x = "Year",
+         y = "CO2 Emission (MT)") +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+}
+
+# France
+plot_co2_stacked_area(Climate_Data, "France")
+
+# Canada
+plot_co2_stacked_area(Climate_Data, "Canada")
+
+# Nigeria
+plot_co2_stacked_area(Climate_Data, "Nigeria")
+
+# Argentina
+plot_co2_stacked_area(Climate_Data, "Argentina")
+
+# China
+plot_co2_stacked_area(Climate_Data, "China")
+
+# Russia
+plot_co2_stacked_area(Climate_Data, "Russia")
+
+# Australia
+plot_co2_stacked_area(Climate_Data, "Australia")
+
+# India
+plot_co2_stacked_area(Climate_Data, "India")
+
+# Brazil
+plot_co2_stacked_area(Climate_Data, "Brazil")
+
+# USA
+plot_co2_stacked_area(Climate_Data, "USA")
+
+
+## Finding the most Crop Yielded Country
+
+crop_yield_order <- Climate_Data %>%
+  group_by(Country) %>%
+  summarise(total_yield = sum(Crop_Yield_MT_per_HA, na.rm = TRUE)) %>%
+  arrange(desc(total_yield)) 
+
+print(crop_yield_order)
+
+# Visualizing Total Crop Yield by Country
+
+ggplot(crop_yield_order, aes(x = Country, y = total_yield, size = total_yield, color = Country)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Bubble Plot of Total Crop Yield by Country",
+       x = "Country",
+       y = "Total Crop Yield (MT per HA)",
+       size = "Total Crop Yield") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+## Fertilizer Usage by Each Country
+
+fertilizer_usage_by_country <- Climate_Data %>%
+  group_by(Country) %>%
+  summarise(total_fertilizer_usage = sum(Fertilizer_Use_KG_per_HA, na.rm = TRUE)) %>%
+  arrange(desc(total_fertilizer_usage)) 
+
+print(fertilizer_usage_by_country)
+
+# Visualizing Total Fertilizer Usage by Country
+
+ggplot(fertilizer_usage_by_country, aes(x = Country, y = total_fertilizer_usage, size = total_fertilizer_usage, color = Country)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Bubble Plot of Total Fertilizer Usage by Country",
+       x = "Country",
+       y = "Total Fertilizer Usage (KG per HA)",
+       size = "Total Fertilizer Usage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+## Pesticide Usage by Each Country
+
+pesticide_usage_by_country <- Climate_Data %>%
+  group_by(Country) %>%
+  summarise(total_pesticide_usage = sum(Pesticide_Use_KG_per_HA, na.rm = TRUE)) %>%
+  arrange(desc(total_pesticide_usage)) 
+
+print(pesticide_usage_by_country)
+
+# Visualizing Total Pesticide Usage by Country
+
+ggplot(pesticide_usage_by_country, aes(x = Country, y = total_pesticide_usage, size = total_pesticide_usage, color = Country)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Bubble Plot of Total Pesticide Usage by Country",
+       x = "Country",
+       y = "Total Pesticide Usage (KG per HA)",
+       size = "Total Pesticide Usage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Creating Function to visualize Soil Health index of All Regions of Each Countries
+
+plot_soil_health_facet <- function(data, country_name) {
+  country_data <- data %>%
+    filter(Country == country_name)
+  
+  if (nrow(country_data) == 0) {
+    stop("No data available for the specified country.")
+  }
+  
+  ggplot(country_data, aes(x = Year, y = Soil_Health_Index, color = Region)) +
+    geom_line(size = 1.2) +
+    geom_point(size = 3) +
+    labs(title = paste("Soil Health Index Trend by Region in", country_name),
+         x = "Year",
+         y = "Soil Health Index") +
+    theme_minimal() +
+    facet_wrap(~ Region, scales = "free_y") +
+    theme(legend.position = "none")
+}
+
+
+# France
+plot_soil_health_facet(Climate_Data, "France")
+
+# Canada
+plot_soil_health_facet(Climate_Data, "Canada")
+
+# Nigeria
+plot_soil_health_facet(Climate_Data, "Nigeria")
+
+# Argentina
+plot_soil_health_facet(Climate_Data, "Argentina")
+
+# China
+plot_soil_health_facet(Climate_Data, "China")
+
+# Russia
+plot_soil_health_facet(Climate_Data, "Russia")
+
+# Australia
+plot_soil_health_facet(Climate_Data, "Australia")
+
+# India
+plot_soil_health_facet(Climate_Data, "India")
+
+# Brazil
+plot_soil_health_facet(Climate_Data, "Brazil")
+
+# USA
+plot_soil_health_facet(Climate_Data, "USA")
+
+
+
+
+
+
+# Function to plot economic impact trend by region for a given country
+
+plot_economic_impact_area <- function(data, country_name) {
+  country_data <- data %>%
+    filter(Country == country_name)
+  
+  if (nrow(country_data) == 0) {
+    stop("No data available for the specified country.")
+  }
+  
+  ggplot(country_data, aes(x = Year, y = Economic_Impact_Million_USD, fill = Region)) +
+    geom_area(alpha = 0.6, position = "stack") +
+    labs(title = paste("Economic Impact Area Plot by Region in", country_name),
+         x = "Year",
+         y = "Economic Impact (Million USD)") +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+}
+
+
+plot_economic_impact_stacked_bar <- function(data, country_name) {
+  country_data <- data %>%
+    filter(Country == country_name)
+  
+  if (nrow(country_data) == 0) {
+    stop("No data available for the specified country.")
+  }
+  
+  ggplot(country_data, aes(x = Year, y = Economic_Impact_Million_USD, fill = Region)) +
+    geom_bar(stat = "identity") +
+    labs(title = paste("Economic Impact Stacked Bar Plot by Region in", country_name),
+         x = "Year",
+         y = "Economic Impact (Million USD)") +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+}
+
+
+
+# France
+plot_economic_impact_area(Climate_Data, "France")
+plot_economic_impact_stacked_bar(Climate_Data, "Canada")
+
+# Canada
+plot_economic_impact_area(Climate_Data, "Canada")
+plot_economic_impact_stacked_bar(Climate_Data, "Canada")
+
+# Nigeria
+plot_economic_impact_area(Climate_Data, "Nigeria")
+plot_economic_impact_stacked_bar(Climate_Data, "Nigeria")
+
+# Argentina
+plot_economic_impact_area(Climate_Data, "Argentina")
+plot_economic_impact_stacked_bar(Climate_Data, "Argentina")
+
+# China
+plot_economic_impact_area(Climate_Data, "China")
+plot_economic_impact_stacked_bar(Climate_Data, "China")
+
+# Russia
+plot_economic_impact_area(Climate_Data, "Russia")
+plot_economic_impact_stacked_bar(Climate_Data, "Russia")
+
+# Australia
+plot_economic_impact_area(Climate_Data, "Australia")
+plot_economic_impact_stacked_bar(Climate_Data, "Australia")
+
+# India
+plot_economic_impact_area(Climate_Data, "India")
+plot_economic_impact_stacked_bar(Climate_Data, "India")
+
+# Brazil
+plot_economic_impact_area(Climate_Data, "Canada")
+plot_economic_impact_stacked_bar(Climate_Data, "Canada")
+
+# USA
+plot_economic_impact_area(Climate_Data, "USA")
+plot_economic_impact_stacked_bar(Climate_Data, "USA")
+
+
+
+
+
+```
